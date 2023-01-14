@@ -3,9 +3,12 @@ import sqlite3
 import click
 from flask import current_app, g
 
+
 def init_app(app):
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
+    app.cli.add_command(migrate_db_command)
+
 
 def get_db():
     if 'db' not in g:
@@ -17,11 +20,13 @@ def get_db():
 
     return g.db
 
+
 def close_db(e=None):
     db = g.pop('db', None)
 
-    if(db is not None):
+    if (db is not None):
         db.close()
+
 
 def init_db():
     db = get_db()
@@ -29,8 +34,23 @@ def init_db():
     with current_app.open_resource('schema.sql') as f:
         db.executescript(f.read().decode('utf8'))
 
+
+def migrate_db():
+    db = get_db()
+
+    with current_app.open_resource('migrate.sql') as f:
+        db.executescript(f.read().decode('utf8'))
+
+
 @click.command('init-db')
 def init_db_command():
-    "Clear the existing data and create new tables."
+    click.echo('Initializing database...')
     init_db()
     click.echo('Database initialized!')
+
+
+@click.command('migrate-db')
+def migrate_db_command():
+    click.echo('Migrating database...')
+    migrate_db()
+    click.echo('Database migrated!')

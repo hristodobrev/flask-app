@@ -20,6 +20,16 @@
         {% endif %}
     </header>
     <p class="body">{{ post['body'] }}</p>
+    <p>
+        {% for like in likes[post['id']] %}
+            <span>{{ like['username'] }}</span>
+        {% endfor %}
+    </p>
+    <p>
+        <form action="/like/{{ post['id'] }}" method="post">
+            <button type="submit">Like</button>
+        </form>
+    </p>
 </article>
 {% if not loop.last %}
 <hr>

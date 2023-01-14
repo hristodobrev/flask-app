@@ -14,12 +14,21 @@ bp = Blueprint('blog', __name__)
 def index():
     db = get_db()
     posts = db.execute(
-        "SELECT p.id, title, body, author_id, username, created"
+        "SELECT p.id, title, body, author_id, u.username, created"
         " FROM post p JOIN user u ON u.id == p.author_id"
         " ORDER BY created DESC"
     ).fetchall()
 
-    return render_template('blog/index.html', posts=posts)
+    likes = {}
+    for post in posts:
+        likes[post['id']] = db.execute(
+            "SELECT u.id, u.username FROM like l"
+            " JOIN user u ON u.id == l.user_id"
+            " WHERE l.post_id = ?",
+            (post['id'],)
+        ).fetchall()
+
+    return render_template('blog/index.html', posts=posts, likes=likes)
 
 
 @bp.route('/create', methods=('GET', 'POST'))
@@ -77,10 +86,28 @@ def update(id):
 @bp.route('/delete/<int:id>', methods=('POST',))
 @login_required
 def delete(id):
-    post = get_post(id)
     db = get_db()
     db.execute("DELETE FROM post WHERE id = ?", (id,))
     db.commit()
+
+    return redirect(url_for('blog.index'))
+
+
+@bp.route('/like/<int:post_id>', methods=('POST',))
+@login_required
+def like_post(post_id):
+    user_id = g.user['id']
+    db = get_db()
+
+    like = db.execute(
+        "SELECT * FROM like WHERE user_id = ? AND post_id = ?",
+        (user_id, post_id)
+    ).fetchone()
+
+    if like is None:
+        db.execute(
+            "INSERT INTO like (user_id, post_id) VALUES (?, ?)", (user_id, post_id))
+        db.commit()
 
     return redirect(url_for('blog.index'))
 

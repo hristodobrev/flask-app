@@ -107,6 +107,28 @@ header .action {
     white-space: pre-line;
 }
 
+.users {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.users thead tr {
+    background-color: white !important;
+    border-bottom: 1px solid #d3d3d3;
+}
+
+.users th {
+    text-align: left;
+}
+
+.users th, .users td {
+    padding: 5px;
+}
+
+.users tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
 .content:last-child {
     margin-bottom: 0;
 }

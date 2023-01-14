@@ -31,11 +31,23 @@ def login_required(view):
     return wrapped_view
 
 
+def admin_required(view):
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if g.user is None or not g.user['admin']:
+            return redirect(url_for('index'))
+
+        return view(**kwargs)
+
+    return wrapped_view
+
+
 @bp.route('/register', methods=('GET', 'POST'))
 def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        admin = True if request.form.get('admin') else False
         db = get_db()
         error = None
 
@@ -47,8 +59,8 @@ def register():
         if error is None:
             try:
                 db.execute(
-                    "INSERT INTO user (username, password) VALUES (?, ?)",
-                    (username, generate_password_hash(password)),
+                    "INSERT INTO user (username, password, admin) VALUES (?, ?, ?)",
+                    (username, generate_password_hash(password), admin),
                 )
                 db.commit()
             except db.IntegrityError:

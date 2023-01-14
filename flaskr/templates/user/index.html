@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block header %}
+<h1>{% block title %}Users{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<table class="users">
+    <thead>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Password</th>
+        <th>Admin</th>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user['id'] }}</td>
+            <td>{{ user['username'] }}</td>
+            <td>********</td>
+            <td>{{ 'Yes' if user['admin'] else 'No' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
